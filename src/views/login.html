@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Login Page</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        form {
+            display: grid;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input,
+        button {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label for="email">email:</label>
+            <input type="text" id="email" name="email" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="button" onclick="login()">Login</button>
+        </form>
+    </div>
+
+    <script>
+        let authToken;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("loginForm").addEventListener("submit", function (event) {
+                event.preventDefault();
+                login();
+            });
+        });
+
+        function login() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            const apiUrl = '/user/login_by';
+
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Login API Response:', data);
+                    
+                    if (data.token) {
+                        authToken = data.token;
+                        console.log('Token:', authToken);
+                        openNewPage('/user/admin_users');
+                    }
+                    throw new Error('Token not found in the login response.');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function openNewPage(url) {
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write('<html><head><title>API Response</title></head><body>');
+            newWindow.document.write('<h1>Login API Response:</h1>');
+
+            fetch(url, {
+                headers: {
+                    'authorization': `${authToken}`,
+                },
+            })
+                .then(adminUsersResponse => adminUsersResponse.json())
+                .then(adminUsersData => {
+                    newWindow.document.write('<pre>' + JSON.stringify(adminUsersData, null, 2) + '</pre>');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    newWindow.document.write('<p>Error connecting to the API.</p>');
+                });
+
+            newWindow.document.write('</body></html>');
+            newWindow.document.close();
+        }
+    </script>
+</body>
+
+</html>
