@@ -103,7 +103,7 @@
     function submitForm() {
       const formData = new FormData(document.getElementById("registrationForm"));
 
-      fetch('/user/register', {
+      fetch('/register', {
         method: 'POST',
         body: formData
       })
