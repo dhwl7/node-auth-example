@@ -7,6 +7,7 @@ const filePath = path.join(__dirname, 'src', 'public', 'index.html');
 const awsServerlessExpress = require('aws-serverless-express');
 const db = require('./src/services/mongodb.js');
 const UserRoutes = require('./src/routes/route');
+const lambda = require('../node-auth-example/lambda.js');
 
 const app = express();
 const PORT = 3000;
@@ -17,6 +18,41 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/', UserRoutes);
 
+exports.handler = async (event) => {
+  try {
+    // Log the incoming event
+    console.log('Received event:', JSON.stringify(event, null, 2));
+
+    // Sample response object
+    const response = {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: 'Hello from AWS Lambda!',
+      }),
+    };
+
+    return response;
+  } catch (error) {
+    // Log any errors
+    console.error('Error:', error);
+
+    // Return an error response
+    return {
+      statusCode: 500,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        error: 'Internal Server Error',
+      }),
+    };
+  }
+};
+
+
 app.get('/', (req, res) => {
   console.log('path.resolve', path.resolve(__dirname));
   res.sendFile(path.resolve(__dirname, './src/views/index.html'));
@@ -26,11 +62,13 @@ app.get('/login', (req, res) => {
   res.sendFile(path.resolve(__dirname, './src/views/login.html'));
 });
 
-const server = awsServerlessExpress.createServer(app);
 
-exports.handler = (event, context) => {
-  awsServerlessExpress.proxy(server, event, context);
-};
+
+// const server = awsServerlessExpress.createServer(app);
+
+// exports.handler = (event, context) => {
+//   awsServerlessExpress.proxy(server, event, context);
+// };
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT} HI NODE`);
