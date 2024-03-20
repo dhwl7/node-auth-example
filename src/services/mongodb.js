@@ -1,10 +1,18 @@
 const mongoose = require('mongoose');
 
-const mongoURI = 'mongodb://localhost:27017/node_auth_example';
+// const mongoURI = 'mongodb://localhost:27017/node_auth_example';
+const mongoURI = 'mongodb+srv://dhavalraiyani277:YFtRBr0Bgt52flof@cluster0.2jkyxdf.mongodb.net/';
+
+
+//Online Configure a Network Connection
+// const connection = mongoose.createConnection(MONGO_URI= "mongodb+srv://dhavalraiyani277:YFtRBr0Bgt52flof@cluster0.2jkyxdf.mongodb.net/", {
+// 	useNewUrlParser: true,
+// 	useUnifiedTopology: true
+// });
 
 // MongoDB connection options
 const options = {
-    useNewUrlParser: true,
+    // useNewUrlParser: true,
     useUnifiedTopology: true,
 };
 

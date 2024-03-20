@@ -7,10 +7,11 @@ const filePath = path.join(__dirname, 'src', 'public', 'index.html');
 const awsServerlessExpress = require('aws-serverless-express');
 const db = require('./src/services/mongodb.js');
 const UserRoutes = require('./src/routes/route');
-const lambda = require('../node-auth-example/lambda.js');
+const serverless = require('serverless-http');
+// const lambda = require('../node-auth-example/lambda.js');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -18,39 +19,14 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/', UserRoutes);
 
-exports.handler = async (event) => {
-  try {
-    // Log the incoming event
-    console.log('Received event:', JSON.stringify(event, null, 2));
+// module.exports.handler = async (event) => {
+//   console.log('event', event);
+//   // Proxy the request to Express
+//   return await app(event);
+// };
 
-    // Sample response object
-    const response = {
-      statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message: 'Hello from AWS Lambda!',
-      }),
-    };
 
-    return response;
-  } catch (error) {
-    // Log any errors
-    console.error('Error:', error);
-
-    // Return an error response
-    return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        error: 'Internal Server Error',
-      }),
-    };
-  }
-};
+module.exports.handler = serverless(app);
 
 
 app.get('/', (req, res) => {

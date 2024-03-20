@@ -1,0 +1,63 @@
+org: dhwl7
+app: node-auth-example
+service: my-serverless-app
+frameworkVersion: 3.38.0
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  deploymentMethod: direct
+  region: ap-south-1
+
+resources:
+  Outputs:
+    APIGatewayRestApiId:
+      Value:
+        Ref: ApiGatewayRestApi
+      Export:
+        Name: ApiGatewayRestApiId
+    APIGatewayRestApiRootResourceId:
+      Value:
+        Fn::GetAtt:
+          - ApiGatewayRestApi
+          - RootResourceId
+      Export:
+        Name: ApiGatewayRestApiRootResourceId
+
+# iamRoleStatements:
+#   - Effect: Allow
+#     Action:
+#       - "s3:*"
+#     Resource: "*"x
+
+functions:
+  hello:
+    handler: index.handler
+    events:
+      - http: GET /hello
+  register:
+    handler: index.handler
+    events:
+      - http: POST /register
+  loginBy: 
+    handler: index.handler
+    events:
+      - http: POST /loginBy
+  getUserList:
+     handler: index.handler
+     events:
+      - http: GET /getUserList
+
+# functions:
+#   ${file(./function-template.yml)}
+
+# functions:
+#   ${forEach file(./endpoints.yml) as endpoint}:
+#     ${endpoint.name}:
+#       handler: index.handler
+#       events:
+#         - http:
+#             path: ${endpoint.path}
+#             method: ${endpoint.method}
+#             function: ${endpoint.name}
+

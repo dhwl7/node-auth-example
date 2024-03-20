@@ -1,17 +1,25 @@
 // controllers/authController.js
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const bcrypt = require('bcrypt');
+const User = require('../models/user');
+const bcrypt = require('bcryptjs');
 const Joi = require('joi');
+const serverlessSdk = require('@serverless/sdk');
+
 
 
 function generateToken(email, role) {
-  return jwt.sign({ email, role }, 'secret', { expiresIn: '1m' });
+  return jwt.sign({ email, role }, 'secret', { expiresIn: '20m' });
 }
 
 exports.hello = async (req, res) => {
-  console.log('hi');
-  res.json({ message: 'Hi Node' });
+  try {
+    console.log('hi');
+    res.json({ message: 'Hi Node' });
+  } catch (error) {
+    console.log('erroe =>', error);
+    res.status(400).json({ error: error });
+  }
+
 };
 
 exports.register = async (req, res) => {
@@ -25,10 +33,10 @@ exports.register = async (req, res) => {
       password: Joi.string().optional().allow(''),
       profile_picture: Joi.string().optional().allow(''),
     });
-    
+
     var profile_picture = '';
     const validate_query = Joi.validate(req.body, schema, { abortEarly: true });
-    // console.log('validate_query', validate_query.value.name);
+    console.log('validate_query', validate_query);
 
     if (validate_query.error) {
       if (validate_query.error.details && validate_query.error.details[0].message) {
@@ -38,7 +46,7 @@ exports.register = async (req, res) => {
       }
       return;
     }
-  
+
     if (req.files.length > 0) {
       path_image = `/adminImage/${req.files[0].filename}`;
       validate_query.value.profile_picture = path_image
@@ -46,14 +54,16 @@ exports.register = async (req, res) => {
     }
 
     const newUser = await User.create(validate_query.value);
+    console.log('newUSer', newUser);
+
     res.json({ message: 'User registered successfully' });
-  } catch (error) {
-    console.log('erroe =>', error);
-    res.status(400).json({ error: 'User registration failed' });
+  } catch (ex) {
+    console.log('erroe =>', ex);
+    res.status(400).json({ error: 'User registration failed', message: serverlessSdk.captureError(ex) });
   }
 };
 
-exports.login = async (req, res) => {
+exports.loginBy = async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -64,7 +74,7 @@ exports.login = async (req, res) => {
     if (user && bcrypt.compareSync(password, user.password)) {
       console.log('Password is correct');
       const token = generateToken(email, user.role);
-      
+
       console.log('token', token);
 
       res.json({ token });
@@ -88,17 +98,17 @@ exports.getUserList = async (req, res) => {
     }
 
     const decoded = jwt.verify(authToken, 'secret');
-    // console.log('decoded', decoded);
+    console.log('decoded', decoded);
 
     if (decoded.role === 'admin') {
       const userList = await User.find({}, { password: 0 });
-      res.json(userList);
+      res.status(200).json({ message: 'Get User List', userList : userList });
     } else {
-      res.status(403).json({ error: 'Forbidden - Admin access only' });
+      res.status(403).json({ error: 'Forbidden - Admin access only', message : 'No' });
     }
 
-  } catch (error) {
-    console.error('Unexpected error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+  } catch (ex) {
+    console.log('erroe =>', ex);
+    res.status(400).json({ error: serverlessSdk.captureError(ex), message : "No"});
   }
 };

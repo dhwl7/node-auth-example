@@ -30,7 +30,7 @@ router.use(upload.any());
 //postman path is http://localhost:3000/hello
 router.get('/hello', authController.hello);
 router.post('/register', authController.register);
-router.post('/login_by', authController.login);
-router.get('/admin_users', authController.getUserList);
+router.post('/loginBy', authController.loginBy);
+router.get('/getUserList', authController.getUserList);
 
 module.exports = router;
